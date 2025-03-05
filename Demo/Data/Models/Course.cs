@@ -20,6 +20,13 @@ namespace Demo.Data.Models
         public string Name { get; set; }
         [Column(TypeName = "varchar(200)")]
         public string Description { get; set; }
+
+        [ForeignKey(nameof(Topic))]
         public int Top_ID { get; set; }
+        public Topic Topic { get; set; }
+
+        public ICollection<Stud_Course> stud_Courses = new HashSet<Stud_Course>();
+
+        public ICollection<Course_Inst> Course_Inst = new HashSet<Course_Inst>();
     }
 }

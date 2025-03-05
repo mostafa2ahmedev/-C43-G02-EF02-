@@ -12,13 +12,13 @@ namespace Demo.Data
     {
 
 
-        public DbSet<Course> Courses { get; set; }
-        public DbSet<Student> Students { get; set; }
-        public DbSet<Topic> Topics { get; set; }
-        public DbSet<Stud_Course> Stud_Courses { get; set; }
-        public DbSet<Instructor> Instructors { get; set; }
-        public DbSet<Course_Inst> Course_Insts { get; set; }
-        public DbSet<Department> Departments { get; set; }
+        public DbSet<Course> Course { get; set; }
+        public DbSet<Student> Student { get; set; }
+        public DbSet<Topic> Topic { get; set; }
+        public DbSet<Stud_Course> Stud_Course { get; set; }
+        public DbSet<Instructor> Instructor { get; set; }
+        public DbSet<Course_Inst> Course_Inst { get; set; }
+        public DbSet<Department> Department { get; set; }
 
 
 
@@ -74,6 +74,36 @@ namespace Demo.Data
                 entity.Property(sc => sc.Grade)
                       .IsRequired(); 
             });
+
+            modelBuilder.Entity<Stud_Course>().HasKey(sc => new { sc.Course_ID, sc.Stud_ID });
+
+            modelBuilder.Entity<Course_Inst>().HasKey(ci => new { ci.Course_ID, ci.Inst_ID });
+
+            modelBuilder.Entity<Course>().HasMany(C => C.stud_Courses)
+                                          .WithOne()
+                                          .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Course>().HasMany(C => C.Course_Inst)
+                                          .WithOne()
+                                          .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Instructor>().HasMany(I => I.Course_Inst)
+                                          .WithOne()
+                                          .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Instructor>().HasOne(I => I.ManagedDept)
+                                        .WithOne(D => D.Manager)
+                                        .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Department>().HasMany(D => D.Instructors)
+                                             .WithOne(I => I.Department)
+                                             .OnDelete(DeleteBehavior.NoAction);
+       
+
+            modelBuilder.Entity<Student>().HasMany(S => S.stud_Courses)
+                                          .WithOne()
+                                          .OnDelete(DeleteBehavior.NoAction);
+
+
 
         }
     }

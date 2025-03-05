@@ -47,23 +47,35 @@ namespace Demo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Courses");
+                    b.HasIndex("Top_ID");
+
+                    b.ToTable("Course");
                 });
 
             modelBuilder.Entity("Demo.Data.Models.Course_Inst", b =>
                 {
+                    b.Property<int>("Course_ID")
+                        .HasColumnType("int");
+
                     b.Property<int>("Inst_ID")
                         .HasColumnType("int");
 
-                    b.Property<int>("Course_ID")
+                    b.Property<int?>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("InstructorId")
                         .HasColumnType("int");
 
                     b.Property<string>("evaluate")
                         .HasColumnType("varchar(100)");
 
-                    b.HasKey("Inst_ID", "Course_ID");
+                    b.HasKey("Course_ID", "Inst_ID");
 
-                    b.ToTable("Course_Insts");
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("InstructorId");
+
+                    b.ToTable("Course_Inst");
                 });
 
             modelBuilder.Entity("Demo.Data.Models.Department", b =>
@@ -80,13 +92,19 @@ namespace Demo.Migrations
                     b.Property<int>("Ins_ID")
                         .HasColumnType("int");
 
+                    b.Property<int>("InstructorId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("varchar(100)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Departments");
+                    b.HasIndex("InstructorId")
+                        .IsUnique();
+
+                    b.ToTable("Department");
                 });
 
             modelBuilder.Entity("Demo.Data.Models.Instructor", b =>
@@ -104,7 +122,7 @@ namespace Demo.Migrations
                     b.Property<int>("Bonus")
                         .HasColumnType("int");
 
-                    b.Property<int>("Dept_ID")
+                    b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
                     b.Property<int>("HourRate")
@@ -119,23 +137,35 @@ namespace Demo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Instructors");
+                    b.HasIndex("DepartmentId");
+
+                    b.ToTable("Instructor");
                 });
 
             modelBuilder.Entity("Demo.Data.Models.Stud_Course", b =>
                 {
+                    b.Property<int>("Course_ID")
+                        .HasColumnType("int");
+
                     b.Property<int>("Stud_ID")
                         .HasColumnType("int");
 
-                    b.Property<int>("Course_ID")
+                    b.Property<int?>("CourseId")
                         .HasColumnType("int");
 
                     b.Property<int>("Grade")
                         .HasColumnType("int");
 
-                    b.HasKey("Stud_ID", "Course_ID");
+                    b.Property<int?>("StudentId")
+                        .HasColumnType("int");
 
-                    b.ToTable("Stud_Courses");
+                    b.HasKey("Course_ID", "Stud_ID");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("Stud_Course");
                 });
 
             modelBuilder.Entity("Demo.Data.Models.Student", b =>
@@ -157,6 +187,9 @@ namespace Demo.Migrations
                     b.Property<int>("Dep_Id")
                         .HasColumnType("int");
 
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
+
                     b.Property<string>("FName")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -169,7 +202,9 @@ namespace Demo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Students");
+                    b.HasIndex("DepartmentId");
+
+                    b.ToTable("Student");
                 });
 
             modelBuilder.Entity("Demo.Data.Models.Topic", b =>
@@ -186,7 +221,103 @@ namespace Demo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Topics");
+                    b.ToTable("Topic");
+                });
+
+            modelBuilder.Entity("Demo.Data.Models.Course", b =>
+                {
+                    b.HasOne("Demo.Data.Models.Topic", "Topic")
+                        .WithMany()
+                        .HasForeignKey("Top_ID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Topic");
+                });
+
+            modelBuilder.Entity("Demo.Data.Models.Course_Inst", b =>
+                {
+                    b.HasOne("Demo.Data.Models.Course", null)
+                        .WithMany("Course_Inst")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Demo.Data.Models.Instructor", null)
+                        .WithMany("Course_Inst")
+                        .HasForeignKey("InstructorId")
+                        .OnDelete(DeleteBehavior.NoAction);
+                });
+
+            modelBuilder.Entity("Demo.Data.Models.Department", b =>
+                {
+                    b.HasOne("Demo.Data.Models.Instructor", "Manager")
+                        .WithOne("ManagedDept")
+                        .HasForeignKey("Demo.Data.Models.Department", "InstructorId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Manager");
+                });
+
+            modelBuilder.Entity("Demo.Data.Models.Instructor", b =>
+                {
+                    b.HasOne("Demo.Data.Models.Department", "Department")
+                        .WithMany("Instructors")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("Demo.Data.Models.Stud_Course", b =>
+                {
+                    b.HasOne("Demo.Data.Models.Course", null)
+                        .WithMany("stud_Courses")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Demo.Data.Models.Student", null)
+                        .WithMany("stud_Courses")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.NoAction);
+                });
+
+            modelBuilder.Entity("Demo.Data.Models.Student", b =>
+                {
+                    b.HasOne("Demo.Data.Models.Department", "Department")
+                        .WithMany("Students")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("Demo.Data.Models.Course", b =>
+                {
+                    b.Navigation("Course_Inst");
+
+                    b.Navigation("stud_Courses");
+                });
+
+            modelBuilder.Entity("Demo.Data.Models.Department", b =>
+                {
+                    b.Navigation("Instructors");
+
+                    b.Navigation("Students");
+                });
+
+            modelBuilder.Entity("Demo.Data.Models.Instructor", b =>
+                {
+                    b.Navigation("Course_Inst");
+
+                    b.Navigation("ManagedDept");
+                });
+
+            modelBuilder.Entity("Demo.Data.Models.Student", b =>
+                {
+                    b.Navigation("stud_Courses");
                 });
 #pragma warning restore 612, 618
         }

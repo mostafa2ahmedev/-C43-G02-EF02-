@@ -14,11 +14,25 @@ namespace Demo.Data.Models
         [Column(TypeName = "varchar(50)")]
 
         public string Name { get; set; }
-        public int Bonus    { get; set; }
+        public int Bonus { get; set; }
         public decimal Salary { get; set; }
         [Column(TypeName = "varchar(50)")]
         public string Adress { get; set; }
         public int HourRate { get; set; }
-        public int Dept_ID { get; set; }
+
+        [ForeignKey(nameof(Department))]
+        public int DepartmentId { get; set; }
+
+      
+        [InverseProperty(nameof(Department.Instructors))]
+        public Department Department { get; set; } = null!;
+
+        [InverseProperty(nameof(Department.Manager))]
+        public Department? ManagedDept { get; set; }
+
+        public ICollection<Course_Inst> Course_Inst = new HashSet<Course_Inst>();
+
+     
+
     }
 }
